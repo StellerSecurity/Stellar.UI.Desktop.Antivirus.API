@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\V1\DashboardController;
 use App\Http\Controllers\V1\LoginController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\RateLimiter;
@@ -20,8 +21,9 @@ Route::prefix('v1/logincontroller')->group(function () {
         ->middleware('throttle:stellar-login');
 });
 
-
-
+Route::prefix('v1/dashboardcontroller')->group(function () {
+    Route::post('/home',  [DashboardController::class, 'home'])->middleware('throttle:10,1');
+});
 
 
 // Define custom rate limiter for login
@@ -30,10 +32,7 @@ RateLimiter::for('stellar-login', function (Request $request) {
     $ip = (string) $request->ip();
 
     return [
-        // Max 10 login-forsøg pr. minut pr. bruger+ip
         Limit::perMinute(10)->by($username.'|'.$ip),
-
-        // Ekstra fallback: max 30 requests pr. minut pr. IP
         Limit::perMinute(30)->by($ip),
     ];
 });
