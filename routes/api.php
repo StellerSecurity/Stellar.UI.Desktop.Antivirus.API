@@ -10,7 +10,7 @@ Route::prefix('v1/logincontroller')->group(function () {
     Route::post('/login',  [LoginController::class, 'auth'])
         ->middleware('throttle:stellar-login');
 
-    Route::post('/register',  [LoginController::class, 'register'])
+    Route::post('/register',  [LoginController::class, 'create'])
         ->middleware('throttle:stellar-login');
 
     Route::post('/password/forgot', [LoginController::class, 'sendResetLink'])
