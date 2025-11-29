@@ -81,7 +81,7 @@ class DashboardController
         }
 
         return response()->json([
-            'user' => $user->username,
+            'user' => ['username' => $user->username],
             'subscription' => [
                 'expires_at' => $subscription->expires_at,
                 'active'     => $subscription->active,
