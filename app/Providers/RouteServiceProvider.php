@@ -39,19 +39,6 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiting(): void
     {
-        // Login attempts – 5 per minute per IP
-        RateLimiter::for('stellar-login', function (Request $request) {
-            return Limit::perMinute(5)->by($request->ip());
-        });
 
-        // Registration – 3 per minute per IP
-        RateLimiter::for('stellar-register', function (Request $request) {
-            return Limit::perMinute(3)->by($request->ip());
-        });
-
-        // Password flows – 5 per minute per IP
-        RateLimiter::for('stellar-password', function (Request $request) {
-            return Limit::perMinute(5)->by($request->ip());
-        });
     }
 }
