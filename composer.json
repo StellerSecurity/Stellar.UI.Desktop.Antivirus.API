@@ -13,7 +13,8 @@
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
-        "stellarsecurity/subscription-laravel": "^1.0",
+        "stellarsecurity/application-insights-laravel": "^1.0",
+        "stellarsecurity/subscription-laravel": "^1.0.2",
         "stellarsecurity/user-laravel": "v1.0.2.3"
     },
     "require-dev": {

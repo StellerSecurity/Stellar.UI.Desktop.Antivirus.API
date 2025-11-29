@@ -105,11 +105,6 @@ return [
         ),
     ],
 
-    // providers
-    'providers' => [
-        // ...
-        App\Providers\RouteServiceProvider::class,
-    ],
 
     /*
     |--------------------------------------------------------------------------
