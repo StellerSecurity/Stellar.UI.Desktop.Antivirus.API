@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\V1;
 
-use Illuminate\Http\Client\Request;
+use Illuminate\Http\Request;
+
 use StellarSecurity\SubscriptionLaravel\Enums\SubscriptionType;
 use StellarSecurity\SubscriptionLaravel\SubscriptionService;
 use StellarSecurity\UserApiLaravel\UserService;
@@ -49,6 +50,7 @@ class DashboardController
 
         $userId = $userToken->token->tokenable_id;
 
+
         // Fetch user
         $userResponse = $this->userService->user($userId);
 
@@ -58,12 +60,15 @@ class DashboardController
 
         $user = $userResponse->object();
 
-        if($user->username == null) {
-            return response('', 502);
+
+        if(!isset($user->user->id)) {
+            return response('', 200);
         }
 
+        $user = $user->user;
+
         // Fetch subscription for this user + ANTIVIRUS type
-        $subscriptionResponse = $this->subscriptionService->user(
+        $subscriptionResponse = $this->subscriptionService->findUserSubscriptions(
             $userId,
             SubscriptionType::ANTIVIRUS->value
         );
@@ -81,10 +86,10 @@ class DashboardController
         }
 
         return response()->json([
-            'user' => ['username' => $user->username],
+            'user' => ['username' => $user->email],
             'subscription' => [
                 'expires_at' => $subscription->expires_at,
-                'active'     => $subscription->active,
+                'active'     => $subscription->status,
             ],
         ], 200);
     }
