@@ -39,7 +39,6 @@ class LoginController extends Controller
 
         $subscriptionId = 0;
 
-        // Kun slå subscription op ved succesfuld auth
         if (($auth->response_code ?? null) === 200 && isset($auth->user->id)) {
             $subscriptionResponse = $this->subscriptionService
                 ->findusersubscriptions($auth->user->id, SubscriptionType::ANTIVIRUS->value);
