@@ -56,6 +56,7 @@ class LoginController extends Controller
 
             'user' => isset($auth->user) ? [
                 'id' => (int) ($auth->user->id ?? 0),
+                'email' => $auth->user->email ?? null,
                 'name' => $auth->user->name ?? null,
                 'token' => $auth->token ?? null,
             ] : null,
