@@ -91,7 +91,7 @@ class DashboardController
             'user' => ['email' => $user->email],
             'subscription' => [
                 'expires_at' => $subscription->expires_at,
-                'active'     => $subscription->status,
+                'status'     => $subscription->status,
             ],
         ], 200);
     }
