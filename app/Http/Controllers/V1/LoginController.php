@@ -62,9 +62,8 @@ class LoginController extends Controller
             'subscription_id' => $subscriptionId,
         ];
 
-        $httpStatus = ($payload['response_code'] === 200) ? 200 : 401;
 
-        return response()->json($payload, $httpStatus);
+        return response()->json($payload);
     }
 
 
