@@ -30,35 +30,44 @@ class LoginController extends Controller
      */
     public function auth(Request $request): JsonResponse
     {
-        $username = $request->input('username');
-        $password = $request->input('password');
-
-        // Call into Stellar User API via package
         $authResponse = $this->userService->auth([
-            'username' => $username,
-            'password' => $password,
+            'username' => $request->input('username'),
+            'password' => $request->input('password'),
         ]);
 
         $auth = $authResponse->object();
 
-        // Always attach subscription_id so the client can rely on the field.
-        $auth->subscription_id = 0;
+        $subscriptionId = 0;
 
-        // If user exists, look up Antivirus subscription via Stellar Subscription API
-        if (isset($auth->user->id)) {
+        // Kun slå subscription op ved succesfuld auth
+        if (($auth->response_code ?? null) === 200 && isset($auth->user->id)) {
             $subscriptionResponse = $this->subscriptionService
                 ->findusersubscriptions($auth->user->id, SubscriptionType::ANTIVIRUS->value);
 
             $subscription = $subscriptionResponse->object();
 
-            // Expecting an array of subscriptions, pick the first one if available
             if (isset($subscription[0]->id)) {
-                $auth->subscription_id = $subscription[0]->id;
+                $subscriptionId = (int) $subscription[0]->id;
             }
         }
 
-        return response()->json($auth);
+        $payload = [
+            'response_code' => (int) ($auth->response_code ?? 500),
+            'response_message' => (string) ($auth->response_message ?? 'Unknown error'),
+
+            'user' => isset($auth->user) ? [
+                'id' => (int) ($auth->user->id ?? 0),
+                'name' => $auth->user->name ?? null,
+                'token' => $auth->token ?? null,
+            ] : null,
+            'subscription_id' => $subscriptionId,
+        ];
+
+        $httpStatus = ($payload['response_code'] === 200) ? 200 : 401;
+
+        return response()->json($payload, $httpStatus);
     }
+
 
     /**
      * Send reset-password link via Stellar User API.
