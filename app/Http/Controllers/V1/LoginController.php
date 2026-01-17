@@ -108,39 +108,52 @@ class LoginController extends Controller
      */
     public function create(Request $request): JsonResponse
     {
-        $username = $request->input('username');
-        $password = $request->input('password');
+        $username = (string) $request->input('username');
+        $password = (string) $request->input('password');
 
-        // Default trial length
-        $days = 91;
+        // Default trial length (days)
+        $trialDays = 91;
 
-        // Create user via Stellar User API
         $createResponse = $this->userService->create([
             'username' => $username,
             'password' => $password,
         ]);
 
-        $auth = $createResponse->object();
+        $create = $createResponse->object();
 
-        // Attach subscription_id for the client
-        $auth->subscription_id = 0;
+        $subscriptionId = 0;
 
-        if (isset($auth->user->id)) {
-            // Create Antivirus subscription via Stellar Subscription API
+        if (($create->response_code ?? null) === 200 && isset($create->user->id)) {
             $subscriptionResponse = $this->subscriptionService->add([
-                'user_id'    => $auth->user->id,
-                'type'       => SubscriptionType::ANTIVIRUS->value,       // Antivirus product
-                'status'     => SubscriptionStatus::ACTIVE->value,        // Immediately active
-                'expires_at' => Carbon::now()->addDays($days),            // Trial / period length
+                'user_id'    => (int) $create->user->id,
+                'type'       => SubscriptionType::ANTIVIRUS->value,
+                'status'     => SubscriptionStatus::ACTIVE->value,
+                'expires_at' => Carbon::now()->addDays($trialDays),
             ]);
 
             $subscription = $subscriptionResponse->object();
 
             if (isset($subscription->id)) {
-                $auth->subscription_id = $subscription->id;
+                $subscriptionId = (int) $subscription->id;
             }
         }
 
-        return response()->json($auth);
+        $payload = [
+            'response_code' => (int) ($create->response_code ?? 500),
+            'response_message' => (string) ($create->response_message ?? 'Unknown error'),
+            'token' => $create->token ?? null,
+            'user' => isset($create->user) ? [
+                'id' => (int) ($create->user->id ?? 0),
+                'email' => $auth->user->email ?? null,
+                'name' => $create->user->name ?? null,
+                'role' => (int) ($create->user->role ?? 0),
+            ] : null,
+            'subscription_id' => $subscriptionId,
+        ];
+
+        $httpStatus = ($payload['response_code'] === 200) ? 200 : 400;
+
+        return response()->json($payload, $httpStatus);
     }
+
 }
