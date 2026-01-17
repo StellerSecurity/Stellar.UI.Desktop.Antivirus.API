@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\V1;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+use Illuminate\Http\Response;
 use StellarSecurity\SubscriptionLaravel\Enums\SubscriptionType;
 use StellarSecurity\SubscriptionLaravel\SubscriptionService;
 use StellarSecurity\UserApiLaravel\UserService;
@@ -24,8 +26,8 @@ class DashboardController
      * - user via User API
      * - subscription via Subscription API (ANTIVIRUS)
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     * @param Request $request
+     * @return JsonResponse|Response
      */
     public function home(Request $request)
     {
@@ -86,7 +88,7 @@ class DashboardController
         }
 
         return response()->json([
-            'user' => ['username' => $user->email],
+            'user' => ['email' => $user->email],
             'subscription' => [
                 'expires_at' => $subscription->expires_at,
                 'active'     => $subscription->status,
