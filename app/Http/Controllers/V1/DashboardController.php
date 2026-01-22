@@ -31,7 +31,7 @@ class DashboardController
      */
     public function home(Request $request)
     {
-        $token = $request->input('token');
+        $token = $request->bearerToken();
 
         if (empty($token)) {
             return response('', 401);
