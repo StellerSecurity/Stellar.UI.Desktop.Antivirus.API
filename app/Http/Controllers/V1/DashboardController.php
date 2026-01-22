@@ -91,7 +91,7 @@ class DashboardController
         $expiresAt = $subscription->expires_at;
 
         $remainingDays = $subscription->expires_at
-            ? max(0, now()->diffInDays($subscription->expires_at, false))
+            ? max(0, (int) now()->diffInDays($subscription->expires_at, false))
             : 0;
 
         return response()->json([
