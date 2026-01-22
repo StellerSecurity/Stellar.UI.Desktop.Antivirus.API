@@ -87,10 +87,18 @@ class DashboardController
             $subscription = $subscriptionData;
         }
 
+
+        $expiresAt = $subscription->expires_at;
+
+        $remainingDays = $subscription->expires_at
+            ? max(0, now($expiresAt->getTimezone() ?? config('app.timezone'))->diffInDays($expiresAt, false))
+            : 0;
+
         return response()->json([
             'user' => ['email' => $user->email],
             'subscription' => [
                 'expires_at' => $subscription->expires_at,
+                'remaining_days'  => $remainingDays,
                 'status'     => $subscription->status,
             ],
         ], 200);
