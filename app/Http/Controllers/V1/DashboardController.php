@@ -87,9 +87,6 @@ class DashboardController
             $subscription = $subscriptionData;
         }
 
-
-        $expiresAt = $subscription->expires_at;
-
         $remainingDays = $subscription->expires_at
             ? max(0, (int) now()->diffInDays($subscription->expires_at, false))
             : 0;
