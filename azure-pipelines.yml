@@ -42,6 +42,37 @@ stages:
       workingDirectory: $(rootFolder)
       displayName: 'Use PHP version $(phpVersion)'
 
+    - task: AzureCLI@2
+      displayName: 'Recover verified dependency versions'
+      inputs:
+        azureSubscription: $(azureSubscription)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -euo pipefail
+          cd "$(System.DefaultWorkingDirectory)"
+          test ! -e composer.lock
+          az rest --method get \
+            --uri 'https://stellaruidesktopantivirusapiprod.scm.azurewebsites.net/api/vfs/site/wwwroot/composer.lock' \
+            --resource 'https://management.azure.com/' \
+            --only-show-errors --output json > composer.lock
+          python3 - <<'STELLAR_VERIFY_LOCK'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          def digest(path):
+              data = json.loads(Path(path).read_text())
+              canonical = json.dumps(data, sort_keys=True, separators=(',', ':')).encode()
+              return hashlib.sha256(canonical).hexdigest()
+
+          if digest('composer.json') != 'ea1fa954946498e8cd4c367e36abc6b2e3c59833a918e4b555a63758ab1efe62':
+              raise SystemExit('Composer manifest changed; review the deployment lock before continuing.')
+          if digest('composer.lock') != '7ff93b2a254b2f26f2dafcf3a58305baffca2f1768f5d1ab6f0d39e96ec5cae7':
+              raise SystemExit('Deployment lock changed; package review is required before continuing.')
+          print('Verified existing dependency versions. No dependency update requested.')
+          STELLAR_VERIFY_LOCK
+
     - script: composer install --no-interaction --prefer-dist --optimize-autoloader
       workingDirectory: $(rootFolder)
       displayName: 'Composer install'
